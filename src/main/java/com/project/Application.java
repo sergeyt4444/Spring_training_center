@@ -3,6 +3,7 @@ package com.project;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.service.AttributeService;
+import com.project.service.ObjAttrService;
 import com.project.service.ObjService;
 import com.project.service.ObjectTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ public class Application implements CommandLineRunner {
     private ObjService objService;
     @Autowired
     private ObjectTypeService objectTypeService;
+    @Autowired
+    private ObjAttrService objAttrService;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class);
@@ -42,6 +45,12 @@ public class Application implements CommandLineRunner {
         objectTypeService.findAll().forEach(System.out::println);
         System.out.println("object types serialized: ");
         System.out.println(objectMapper.writeValueAsString(objectTypeService.findAll()));
+        System.out.println("-------------------------------------------");
+        System.out.println("object-attribute list: ");
+        objAttrService.findAll().forEach(System.out::println);
+        System.out.println("object-attribute list serialized: ");
+        System.out.println(objectMapper.writeValueAsString(objAttrService.findAll()));
+
     }
 
     }

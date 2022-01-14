@@ -18,13 +18,11 @@ public class ObjAttr {
     @ManyToOne
     @MapsId("objId")
     @JoinColumn(name = "obj_id")
-    @JsonIgnore
     Obj object;
 
     @ManyToOne
     @MapsId("attrId")
     @JoinColumn(name = "attr_id")
-    @JsonIgnore
     Attribute attribute;
 
     private String value;
@@ -33,6 +31,8 @@ public class ObjAttr {
     public String toString() {
         return "ObjAttr{" +
                 "id=" + id +
+                ", object=" + object +
+                ", attribute=" + attribute +
                 ", value='" + value + '\'' +
                 '}';
     }

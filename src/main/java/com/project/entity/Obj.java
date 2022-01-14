@@ -1,6 +1,7 @@
 package com.project.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +20,7 @@ public class Obj {
 
 
     @OneToMany(mappedBy = "object", fetch=FetchType.EAGER)
+    @JsonIgnore
     private List<ObjAttr> objAttrs;
 
     @ManyToOne(fetch=FetchType.EAGER)
@@ -29,7 +31,6 @@ public class Obj {
     public String toString() {
         return "Obj{" +
                 "obj_id=" + obj_id +
-                ", objAttrs=" + objAttrs +
                 ", objectType=" + objectType +
                 '}';
     }
