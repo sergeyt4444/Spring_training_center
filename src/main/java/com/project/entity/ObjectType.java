@@ -1,6 +1,5 @@
 package com.project.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,9 +15,11 @@ public class ObjectType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int obj_types_id;
+    @Column (name = "obj_types_id")
+    private int objTypesId;
 
-    private String obj_types_name;
+    @Column (name = "obj_types_name")
+    private String objTypesName;
 
     @ManyToMany(fetch=FetchType.EAGER)
     @JoinTable(
@@ -32,8 +33,8 @@ public class ObjectType {
     @Override
     public String toString() {
         return "ObjectType{" +
-                "obj_types_id=" + obj_types_id +
-                ", obj_types_name='" + obj_types_name + '\'' +
+                "obj_types_id=" + objTypesId +
+                ", obj_types_name='" + objTypesName + '\'' +
                 ", objTypeAttributes=" + objTypeAttributes +
                 '}';
     }

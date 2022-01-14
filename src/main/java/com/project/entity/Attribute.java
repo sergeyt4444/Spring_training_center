@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -17,12 +16,17 @@ public class Attribute {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int attr_id;
+    @Column (name = "attr_id")
+    private int attrId;
 
-    private String attr_name;
-    private String attr_type;
-    private boolean is_multiple;
-    private boolean is_hidden;
+    @Column (name = "attr_name")
+    private String attrName;
+    @Column (name = "attr_type")
+    private String attrType;
+    @Column (name = "is_multiple")
+    private boolean isMultiple;
+    @Column (name = "is_hidden")
+    private boolean isHidden;
 
     @ManyToMany(fetch=FetchType.EAGER, mappedBy = "objTypeAttributes")
     @JsonBackReference
@@ -35,11 +39,11 @@ public class Attribute {
     @Override
     public String toString() {
         return "Attribute{" +
-                "attr_id=" + attr_id +
-                ", attr_name='" + attr_name + '\'' +
-                ", attr_type='" + attr_type + '\'' +
-                ", is_multiple=" + is_multiple +
-                ", is_hidden=" + is_hidden +
+                "attrId=" + attrId +
+                ", attrName='" + attrName + '\'' +
+                ", attrType='" + attrType + '\'' +
+                ", isMultiple=" + isMultiple +
+                ", isHidden=" + isHidden +
                 '}';
     }
 }

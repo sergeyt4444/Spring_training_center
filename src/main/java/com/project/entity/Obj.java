@@ -16,7 +16,8 @@ public class Obj {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int obj_id;
+    @Column (name = "obj_id")
+    private int objId;
 
 
     @OneToMany(mappedBy = "object", fetch=FetchType.EAGER)
@@ -30,7 +31,7 @@ public class Obj {
     @Override
     public String toString() {
         return "Obj{" +
-                "obj_id=" + obj_id +
+                "obj_id=" + objId +
                 ", objectType=" + objectType +
                 '}';
     }
