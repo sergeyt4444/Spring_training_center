@@ -1,9 +1,12 @@
 package com.project.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.List;
@@ -19,9 +22,9 @@ public class Obj {
     @Column (name = "obj_id")
     private int objId;
 
-
-    @OneToMany(mappedBy = "object", fetch=FetchType.EAGER)
-    @JsonIgnore
+    @OneToMany(fetch=FetchType.EAGER)
+    @JoinColumn(name = "obj_id", referencedColumnName = "obj_id")
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<ObjAttr> objAttrs;
 
     @ManyToOne(fetch=FetchType.EAGER)
@@ -31,7 +34,8 @@ public class Obj {
     @Override
     public String toString() {
         return "Obj{" +
-                "obj_id=" + objId +
+                "objId=" + objId +
+                ", objAttrs=" + objAttrs +
                 ", objectType=" + objectType +
                 '}';
     }

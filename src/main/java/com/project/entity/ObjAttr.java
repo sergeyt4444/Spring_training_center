@@ -1,6 +1,7 @@
 package com.project.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,26 +13,25 @@ import javax.persistence.*;
 @Setter
 public class ObjAttr {
 
-    @EmbeddedId
-    ObjAttrKey id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column (name = "obj_attr_id")
+    private int objAttrId;
+
+    @Column(name = "obj_id")
+    private int objId;
 
     @ManyToOne
-    @MapsId("objId")
-    @JoinColumn(name = "obj_id")
-    Obj object;
-
-    @ManyToOne
-    @MapsId("attrId")
     @JoinColumn(name = "attr_id")
-    Attribute attribute;
+    private Attribute attribute;
 
     private String value;
 
     @Override
     public String toString() {
         return "ObjAttr{" +
-                "id=" + id +
-                ", object=" + object +
+                "objAttrId=" + objAttrId +
+                ", objId=" + objId +
                 ", attribute=" + attribute +
                 ", value='" + value + '\'' +
                 '}';

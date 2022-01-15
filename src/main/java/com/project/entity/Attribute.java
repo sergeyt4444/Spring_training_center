@@ -28,13 +28,6 @@ public class Attribute {
     @Column (name = "is_hidden")
     private boolean isHidden;
 
-    @ManyToMany(fetch=FetchType.EAGER, mappedBy = "objTypeAttributes")
-    @JsonBackReference
-    private List<ObjectType> objTypes;
-
-    @OneToMany(mappedBy = "attribute")
-    @JsonIgnore
-    List<ObjAttr> objAttrs;
 
     @Override
     public String toString() {

@@ -27,7 +27,6 @@ public class ObjectType {
             joinColumns = @JoinColumn(name = "obj_type_id"),
             inverseJoinColumns = @JoinColumn(name = "attr_id")
     )
-    @JsonManagedReference
     private List<Attribute> objTypeAttributes;
 
     @Override
