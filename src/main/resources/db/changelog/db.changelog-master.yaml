@@ -1,0 +1,185 @@
+databaseChangeLog:
+- changeSet:
+    id: 1642117905869-1
+    author: serge (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: object_pkey
+            name: obj_id
+            type: INTEGER
+        - column:
+            name: obj_type_id
+            type: INTEGER
+        tableName: object
+- changeSet:
+    id: 1642117905869-2
+    author: serge (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: attributes_pkey
+            name: attr_id
+            type: INTEGER
+        - column:
+            name: attr_name
+            type: VARCHAR(30)
+        - column:
+            name: attr_type
+            type: VARCHAR(30)
+        - column:
+            name: is_multiple
+            type: BOOLEAN
+        - column:
+            name: is_hidden
+            type: BOOLEAN
+        tableName: attributes
+- changeSet:
+    id: 1642117905869-3
+    author: serge (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: obj_attr_pkey
+            name: obj_attr_id
+            type: INTEGER
+        - column:
+            name: obj_id
+            type: INTEGER
+        - column:
+            name: attr_id
+            type: INTEGER
+        - column:
+            name: value
+            type: VARCHAR(250)
+        tableName: obj_attr
+- changeSet:
+    id: 1642117905869-4
+    author: serge (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: obj_types_pkey
+            name: obj_types_id
+            type: INTEGER
+        - column:
+            name: obj_types_name
+            type: VARCHAR(30)
+        tableName: obj_types
+- changeSet:
+    id: 1642117905869-5
+    author: serge (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: obj_type_attr_pkey
+            name: obj_type_attr_id
+            type: INTEGER
+        - column:
+            name: obj_type_id
+            type: INTEGER
+        - column:
+            name: attr_id
+            type: INTEGER
+        tableName: obj_type_attr
+- changeSet:
+    id: 1642117905869-6
+    author: serge (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: attr_id
+        baseTableName: obj_attr
+        constraintName: fk_attribute
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: CASCADE
+        referencedColumnNames: attr_id
+        referencedTableName: attributes
+        validate: true
+- changeSet:
+    id: 1642117905869-7
+    author: serge (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: attr_id
+        baseTableName: obj_type_attr
+        constraintName: fk_attribute
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: CASCADE
+        referencedColumnNames: attr_id
+        referencedTableName: attributes
+        validate: true
+- changeSet:
+    id: 1642117905869-8
+    author: serge (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: obj_type_id
+        baseTableName: obj_type_attr
+        constraintName: fk_obj_type
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: CASCADE
+        referencedColumnNames: obj_types_id
+        referencedTableName: obj_types
+        validate: true
+- changeSet:
+    id: 1642117905869-9
+    author: serge (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: obj_type_id
+        baseTableName: object
+        constraintName: fk_obj_type
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: CASCADE
+        referencedColumnNames: obj_types_id
+        referencedTableName: obj_types
+        validate: true
+- changeSet:
+    id: 1642117905869-10
+    author: serge (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: obj_id
+        baseTableName: obj_attr
+        constraintName: fk_object
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: CASCADE
+        referencedColumnNames: obj_id
+        referencedTableName: object
+        validate: true
+
