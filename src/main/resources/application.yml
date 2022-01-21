@@ -1,0 +1,14 @@
+spring:
+  main:
+    allow-circular-references: 'true'
+  datasource:
+    username: postgres
+    url: jdbc:postgresql://localhost:5432/coursestemp
+    password: postgres
+keycloak:
+  auth-server-url: http://localhost:8180/auth
+  realm: myrealm
+  public-client: 'true'
+  resource: spring
+server:
+  port: '8080'
