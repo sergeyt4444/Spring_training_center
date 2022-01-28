@@ -2,14 +2,17 @@ package com.project;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.discovery.EurekaClient;
 import com.project.service.AttributeService;
 import com.project.service.ObjAttrService;
 import com.project.service.ObjService;
 import com.project.service.ObjectTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Lazy;
 
 @SpringBootApplication
 public class Application implements CommandLineRunner {
@@ -22,6 +25,13 @@ public class Application implements CommandLineRunner {
     private ObjectTypeService objectTypeService;
     @Autowired
     private ObjAttrService objAttrService;
+
+    @Autowired
+    @Lazy
+    private EurekaClient eurekaClient;
+
+    @Value("${spring.application.name}")
+    private String appName;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class);
