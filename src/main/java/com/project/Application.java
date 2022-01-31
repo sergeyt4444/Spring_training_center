@@ -26,13 +26,6 @@ public class Application implements CommandLineRunner {
     @Autowired
     private ObjAttrService objAttrService;
 
-    @Autowired
-    @Lazy
-    private EurekaClient eurekaClient;
-
-    @Value("${spring.application.name}")
-    private String appName;
-
     public static void main(String[] args) {
         SpringApplication.run(Application.class);
     }
