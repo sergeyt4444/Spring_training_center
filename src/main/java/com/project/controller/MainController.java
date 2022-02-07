@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-public class mainController {
+public class MainController {
 
     @Autowired
     private ObjService objService;
