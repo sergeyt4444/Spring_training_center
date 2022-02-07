@@ -53,6 +53,13 @@ public class Application implements CommandLineRunner {
         objAttrService.findAll().forEach(System.out::println);
         System.out.println("object-attribute list serialized: ");
         System.out.println(objectMapper.writeValueAsString(objAttrService.findAll()));
+        System.out.println("-------------------------------------------");
+        System.out.println("courses");
+        objService.findByObjType("course").forEach(System.out::println);
+        System.out.println("-------------------------------------------");
+        System.out.println("main courses");
+        objService.findMainCategories().forEach(System.out::println);
+
 
     }
 
