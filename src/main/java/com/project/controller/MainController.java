@@ -1,8 +1,10 @@
 package com.project.controller;
 
 import com.project.entity.Obj;
+import com.project.entity.ObjectTypeEnum;
 import com.project.service.ObjService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,7 +46,8 @@ public class MainController {
 
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/main_categories")
-    public List<Obj> getMainCategories() {
-        return objService.findMainCategories();
+    public ResponseEntity<List<Obj>> getMainCategories() {
+//        return ResponseEntity.ok(objService.findMainCategories());
+        return ResponseEntity.ok(objService.findByObjTypeAndParentId(ObjectTypeEnum.COURSE, "0"));
     }
 }

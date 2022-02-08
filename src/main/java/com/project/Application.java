@@ -3,6 +3,7 @@ package com.project;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.discovery.EurekaClient;
+import com.project.entity.ObjectTypeEnum;
 import com.project.service.AttributeService;
 import com.project.service.ObjAttrService;
 import com.project.service.ObjService;
@@ -55,10 +56,13 @@ public class Application implements CommandLineRunner {
         System.out.println(objectMapper.writeValueAsString(objAttrService.findAll()));
         System.out.println("-------------------------------------------");
         System.out.println("courses");
-        objService.findByObjType("course").forEach(System.out::println);
+        objService.findByObjTypeId(1).forEach(System.out::println);
+        System.out.println("-------------------------------------------");
+        System.out.println("courses by enum");
+        objService.findByObjTypeId(ObjectTypeEnum.COURSE).forEach(System.out::println);
         System.out.println("-------------------------------------------");
         System.out.println("main courses");
-        objService.findMainCategories().forEach(System.out::println);
+        objService.findByObjTypeAndParentId(ObjectTypeEnum.COURSE, "0").forEach(System.out::println);
 
 
     }
