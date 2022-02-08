@@ -47,7 +47,6 @@ public class MainController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/main_categories")
     public ResponseEntity<List<Obj>> getMainCategories() {
-//        return ResponseEntity.ok(objService.findMainCategories());
         return ResponseEntity.ok(objService.findByObjTypeAndParentId(ObjectTypeEnum.COURSE, "0"));
     }
 }

@@ -38,22 +38,6 @@ public class ObjService {
         return objRepository.findAllByObjectTypeAndParentId(objectTypeEnum.getValue(), parentId);
     }
 
-//    public List<Obj> findMainCategories() {
-//        List<Obj> list = findByObjTypeId(1);
-//        List<Obj> result = new ArrayList<>();
-//        for (Obj obj: list) {
-//            int flag = 0;
-//            for (ObjAttr objAttr:obj.getObjAttrs()) {
-//                if (objAttr.getAttribute().getAttrName().equals("parent ID")
-//                        && objAttr.getValue()==null) {
-//                    flag = 1;
-//                }
-//            }
-//            if (flag == 1) {
-//                result.add(obj);
-//            }
-//        }
-//        return result;
-//    }
+
 
 }
