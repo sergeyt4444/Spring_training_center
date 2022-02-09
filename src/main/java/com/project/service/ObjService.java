@@ -31,10 +31,16 @@ public class ObjService {
     }
 
     public List<Obj> findByObjTypeAndParentId(int objType, String parentId) {
+        if (parentId == null) {
+            parentId = "0";
+        }
         return objRepository.findAllByObjectTypeAndParentId(objType, parentId);
     }
 
     public List<Obj> findByObjTypeAndParentId(ObjectTypeEnum objectTypeEnum, String parentId) {
+        if (parentId == null) {
+            parentId = "0";
+        }
         return objRepository.findAllByObjectTypeAndParentId(objectTypeEnum.getValue(), parentId);
     }
 
