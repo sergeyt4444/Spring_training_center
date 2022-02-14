@@ -22,7 +22,7 @@ public class Obj {
     @Column (name = "obj_id")
     private int objId;
 
-    @OneToMany(fetch=FetchType.EAGER)
+    @OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinColumn(name = "obj_id", referencedColumnName = "obj_id")
     @Fetch(value = FetchMode.SUBSELECT)
     private List<ObjAttr> objAttrs;
