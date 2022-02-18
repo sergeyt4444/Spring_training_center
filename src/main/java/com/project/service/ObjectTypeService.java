@@ -19,4 +19,8 @@ public class ObjectTypeService {
         return objectTypeRepository.findAll();
     }
 
+    public List<Attribute> findAttributesByObjectType(int objTypeId) {
+        return objectTypeRepository.findById(objTypeId).get().getObjTypeAttributes();
+    }
+
 }
