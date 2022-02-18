@@ -17,4 +17,8 @@ public interface ObjRepository extends JpaRepository<Obj, Integer> {
             + "and (objAttr.value = :parentId) and (objAttr.attribute.attrId = 3)")
     public List<Obj> findAllByObjectTypeAndParentId(@Param("objId")int objId, @Param("parentId")String parentId);
 
+    @Query("select obj from Obj obj join obj.objAttrs objAttr where (obj.objectType.objTypesId = :objId) "
+            + "and (objAttr.value = :courseName) and (objAttr.attribute.attrId = 1)")
+    public List<Obj> findByObjectTypeAndName(@Param("objId")int objId, @Param("courseName")String courseName);
+
 }
