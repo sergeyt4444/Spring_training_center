@@ -21,7 +21,7 @@ public class ObjAttr {
     @Column(name = "obj_id")
     private int objId;
 
-    @ManyToOne
+    @ManyToOne(cascade=CascadeType.PERSIST)
     @JoinColumn(name = "attr_id")
     private Attribute attribute;
 

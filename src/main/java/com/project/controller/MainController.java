@@ -2,8 +2,11 @@ package com.project.controller;
 
 import com.project.entity.Attribute;
 import com.project.entity.Obj;
+import com.project.entity.ObjAttr;
 import com.project.entity.ObjectTypeEnum;
+import com.project.misc.MiscTool;
 import com.project.service.AttributeService;
+import com.project.service.ObjAttrService;
 import com.project.service.ObjService;
 import com.project.service.ObjectTypeService;
 import com.sun.jersey.api.NotFoundException;
@@ -15,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +34,9 @@ public class MainController {
 
     @Autowired
     private ObjectTypeService objectTypeService;
+
+    @Autowired
+    private ObjAttrService objAttrService;
 
     @GetMapping("/anonymous")
     public String getAnonymousInfo() {
@@ -113,6 +120,45 @@ public class MainController {
     @GetMapping("/attributes/{id}")
     public ResponseEntity<List<Attribute>> getAttributesByObjTypeId(@PathVariable(value = "id")Integer objTypeId) {
         return ResponseEntity.ok(objectTypeService.findAttributesByObjectType(objTypeId));
+    }
+
+    @PreAuthorize("hasRole('MODERATOR')")
+    @PutMapping("/objattrs")
+    public ResponseEntity createObjAttr(@RequestBody Map<String, String> mappedObjAttr) {
+        Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
+        objAttrService.createObjAttr(mappedObjAttr, obj);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @PutMapping("/usercourses")
+    public ResponseEntity addUserCourse(@RequestBody Map<String, String> mappedObjAttr) {
+        if (MiscTool.accesibleByUsersAttrs.contains(mappedObjAttr.get("name"))) {
+            Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
+            objAttrService.createObjAttr(mappedObjAttr, obj);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }
+        else {
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PreAuthorize("hasRole('MODERATOR')")
+    @DeleteMapping("objattrs/{id}")
+    public Map<String, Boolean> deleteObjAttr(@PathVariable (value = "id")Integer id) {
+        ObjAttr objAttr = objAttrService.findById(id).orElseThrow( () ->
+                new NotFoundException());
+        objAttrService.delete(objAttr);
+
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("deleted", true);
+        return response;
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("users/{name}")
+    public ResponseEntity getUser(@PathVariable (value = "name") String username) {
+        return ResponseEntity.ok(objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username));
     }
 
 
