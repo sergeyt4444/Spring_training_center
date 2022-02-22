@@ -123,10 +123,18 @@ public class MainController {
     }
 
     @PreAuthorize("hasRole('MODERATOR')")
-    @PutMapping("/objattrs")
+    @PostMapping("/objattrs")
     public ResponseEntity createObjAttr(@RequestBody Map<String, String> mappedObjAttr) {
         Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
         objAttrService.createObjAttr(mappedObjAttr, obj);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @PreAuthorize("hasRole('MODERATOR')")
+    @PutMapping("/objattrs")
+    public ResponseEntity changeObjAttr(@RequestBody Map<String, String> mappedObjAttr) {
+        Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
+        objAttrService.changeObjAttr(mappedObjAttr, obj);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 

@@ -30,31 +30,29 @@ public class ObjAttrService {
     }
 
     public void createObjAttr(Map<String, String> mappedObjAttr, Obj obj) {
-        Attribute attribute = attributeRepository.findByAttrName(mappedObjAttr.get("name"));
 
-        if (attribute == null) {
-            attribute = new Attribute();
-            attribute.setAttrName(mappedObjAttr.get("name"));
-            attribute.setAttrType(mappedObjAttr.get("type"));
-            attribute.setHidden(Boolean.parseBoolean(mappedObjAttr.get("isHidden")));
-            attribute.setMultiple(Boolean.parseBoolean(mappedObjAttr.get("isMultiple")));
-        }
+        Attribute attribute = new Attribute();
+        attribute.setAttrName(mappedObjAttr.get("name"));
+        attribute.setAttrType(mappedObjAttr.get("type"));
+        attribute.setHidden(Boolean.parseBoolean(mappedObjAttr.get("isHidden")));
+        attribute.setMultiple(Boolean.parseBoolean(mappedObjAttr.get("isMultiple")));
 
-        ObjAttr objAttr = objAttrRepository.findByAttribute_AttrNameAndObjId(mappedObjAttr.get("name"), obj.getObjId());
-        if (objAttr == null) {
-            objAttr = new ObjAttr();
-            objAttr.setAttribute(attribute);
-            objAttr.setValue(mappedObjAttr.get("value"));
-            objAttr.setObjId(obj.getObjId());
-        }
-        else {
-            objAttr.setValue(mappedObjAttr.get("value"));
-        }
+        ObjAttr objAttr = new ObjAttr();
+        objAttr.setAttribute(attribute);
+        objAttr.setValue(mappedObjAttr.get("value"));
+        objAttr.setObjId(obj.getObjId());
 
         objAttrRepository.save(objAttr);
     }
 
-    public void delete(ObjAttr objAttr) {
+    public void changeObjAttr(Map<String, String> mappedObjAttr, Obj obj) {
+        ObjAttr objAttr = objAttrRepository.findByAttribute_AttrNameAndObjId(mappedObjAttr.get("name"), obj.getObjId());
+        objAttr.setValue(mappedObjAttr.get("value"));
+
+        objAttrRepository.save(objAttr);
+    }
+
+        public void delete(ObjAttr objAttr) {
         objAttrRepository.delete(objAttr);
     }
 
