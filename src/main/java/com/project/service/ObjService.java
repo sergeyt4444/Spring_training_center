@@ -6,6 +6,7 @@ import com.project.repository.ObjAttrRepository;
 import com.project.repository.ObjRepository;
 import com.project.repository.ObjectTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -88,6 +89,11 @@ public class ObjService {
         }
         obj.setObjAttrs(objAttrList);
         objRepository.save(obj);
+    }
+
+    public List<Obj> findFilteredObjects(int objId, String parentId, List<String> difficulties,
+                                         List<String> languages, List<String> formats) {
+        return objRepository.findFilteredObjects(objId, parentId, difficulties, languages, formats);
     }
 
     private String validateParentId(String parentId) {

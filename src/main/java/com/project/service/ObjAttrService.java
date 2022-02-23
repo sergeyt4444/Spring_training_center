@@ -29,20 +29,42 @@ public class ObjAttrService {
         return objAttrRepository.findById(id);
     }
 
+    public ObjAttr findByAttrNameAndObjId(String attrName, int objId) {
+        return objAttrRepository.findByAttribute_AttrNameAndObjId(attrName, objId);
+    }
+
     public void createObjAttr(Map<String, String> mappedObjAttr, Obj obj) {
+        Attribute attribute = attributeRepository.findByAttrName(mappedObjAttr.get("name"));
 
-        Attribute attribute = new Attribute();
-        attribute.setAttrName(mappedObjAttr.get("name"));
-        attribute.setAttrType(mappedObjAttr.get("type"));
-        attribute.setHidden(Boolean.parseBoolean(mappedObjAttr.get("isHidden")));
-        attribute.setMultiple(Boolean.parseBoolean(mappedObjAttr.get("isMultiple")));
+        if (attribute == null) {
+            attribute = new Attribute();
+            attribute.setAttrName(mappedObjAttr.get("name"));
+            attribute.setAttrType(mappedObjAttr.get("type"));
+            attribute.setHidden(Boolean.parseBoolean(mappedObjAttr.get("isHidden")));
+            attribute.setMultiple(Boolean.parseBoolean(mappedObjAttr.get("isMultiple")));
+        }
 
-        ObjAttr objAttr = new ObjAttr();
-        objAttr.setAttribute(attribute);
-        objAttr.setValue(mappedObjAttr.get("value"));
-        objAttr.setObjId(obj.getObjId());
+        ObjAttr objAttr = objAttrRepository.findByAttribute_AttrNameAndObjId(mappedObjAttr.get("name"), obj.getObjId());
+        if (objAttr == null) {
+            objAttr = new ObjAttr();
+            objAttr.setAttribute(attribute);
+            objAttr.setValue(mappedObjAttr.get("value"));
+            objAttr.setObjId(obj.getObjId());
+        }
+        else {
+            objAttr.setValue(mappedObjAttr.get("value"));
+        }
 
         objAttrRepository.save(objAttr);
+    }
+
+    public void changeObjAttrBulk(List<Map<String, String>> mappedObjAttrs) {
+        for (Map<String, String> mappedObjAttr: mappedObjAttrs) {
+            ObjAttr objAttr = objAttrRepository.findByAttribute_AttrNameAndObjId(mappedObjAttr.get("name"),
+                    Integer.parseInt(mappedObjAttr.get("objId")));
+            objAttr.setValue(mappedObjAttr.get("value"));
+            objAttrRepository.save(objAttr);
+        }
     }
 
     public void changeObjAttr(Map<String, String> mappedObjAttr, Obj obj) {
@@ -52,7 +74,7 @@ public class ObjAttrService {
         objAttrRepository.save(objAttr);
     }
 
-        public void delete(ObjAttr objAttr) {
+    public void delete(ObjAttr objAttr) {
         objAttrRepository.delete(objAttr);
     }
 

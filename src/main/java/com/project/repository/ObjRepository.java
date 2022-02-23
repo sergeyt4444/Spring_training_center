@@ -25,4 +25,15 @@ public interface ObjRepository extends JpaRepository<Obj, Integer> {
             + "and (objAttr.value = :username) and (objAttr.attribute.attrId = 500)")
     public List<Obj> findByObjectTypeAndUsername(@Param("objId")int objId, @Param("username")String username);
 
+    @Query("select obj from Obj obj join obj.objAttrs pidObjAttr join obj.objAttrs difObjAttr join obj.objAttrs langObjAttr"
+            + " join obj.objAttrs formatObjAttr where (obj.objectType.objTypesId = :objId) " +
+            "and (pidObjAttr.value =:parentId) and (pidObjAttr.attribute.attrId = 3)" +
+            "and (difObjAttr.value in :difList) and (difObjAttr.attribute.attrId = 7)" +
+            " and (langObjAttr.value in :langList) and (langObjAttr.attribute.attrId = 8)" +
+            " and (formatObjAttr.value in :formatList) and (formatObjAttr.attribute.attrId = 9)")
+    public List<Obj> findFilteredObjects(@Param("objId")int objId, @Param("parentId")String parentId,
+                                         @Param("difList")List<String> difficulties,
+                                         @Param("langList")List<String> languages,
+                                         @Param("formatList")List<String> formats);
+
 }

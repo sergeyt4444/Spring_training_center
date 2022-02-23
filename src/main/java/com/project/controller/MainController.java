@@ -1,14 +1,12 @@
 package com.project.controller;
 
-import com.project.entity.Attribute;
-import com.project.entity.Obj;
-import com.project.entity.ObjAttr;
-import com.project.entity.ObjectTypeEnum;
+import com.project.entity.*;
 import com.project.misc.MiscTool;
 import com.project.service.AttributeService;
 import com.project.service.ObjAttrService;
 import com.project.service.ObjService;
 import com.project.service.ObjectTypeService;
+import com.project.tools.ObjectConverter;
 import com.sun.jersey.api.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,9 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api")
@@ -94,10 +90,19 @@ public class MainController {
         return ResponseEntity.ok(objService.findByObjTypeAndParentId(ObjectTypeEnum.COURSE, parentId.toString()));
     }
 
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("filteredcourses/{pid}")
+    public ResponseEntity<List<Obj>> getFilteredCourses(@PathVariable(value = "pid")Integer parentId,
+                                                        @RequestParam List<String> difficulties,
+                                                        @RequestParam List<String> languages,
+                                                        @RequestParam List<String> formats) {
+        return ResponseEntity.ok(objService.findFilteredObjects(ObjectTypeEnum.COURSE.getValue(), parentId.toString(),
+                difficulties, languages, formats));
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/categories")
     public ResponseEntity createCategory(@RequestBody Map<Integer, String> mappedObj) {
-        System.out.println(mappedObj);
         objService.createObj(mappedObj, ObjectTypeEnum.CATEGORY.getValue());
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
@@ -105,8 +110,14 @@ public class MainController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/courses")
     public ResponseEntity createCourse(@RequestBody Map<Integer, String> mappedObj) {
-        System.out.println(mappedObj);
         objService.createObj(mappedObj, ObjectTypeEnum.COURSE.getValue());
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("courses")
+    public ResponseEntity editCourse(@RequestBody List<Map<String, String>> mappedObjAttrs) {
+        objAttrService.changeObjAttrBulk(mappedObjAttrs);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
@@ -143,7 +154,7 @@ public class MainController {
     public ResponseEntity addUserCourse(@RequestBody Map<String, String> mappedObjAttr) {
         if (MiscTool.accesibleByUsersAttrs.contains(mappedObjAttr.get("name"))) {
             Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
-            objAttrService.createObjAttr(mappedObjAttr, obj);
+            objAttrService.changeObjAttr(mappedObjAttr, obj);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
         else {
@@ -167,6 +178,19 @@ public class MainController {
     @GetMapping("users/{name}")
     public ResponseEntity getUser(@PathVariable (value = "name") String username) {
         return ResponseEntity.ok(objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username));
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("usercourses/{name}")
+    public ResponseEntity<List<Obj>> getUserCourses(@PathVariable (value = "name") String username) {
+        Obj user = objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username);
+        Map<Integer, String> mappedUser = ObjectConverter.convertObject(user);
+        List<String> coursesNames = Arrays.asList(mappedUser.get(AttrEnum.USER_COURSES.getValue()).split(";"));
+        List<Obj> courses = new ArrayList<>();
+        for (String courseName: coursesNames) {
+            courses.add(objService.findByObjTypeAndName(ObjectTypeEnum.COURSE.getValue(), courseName));
+        }
+        return ResponseEntity.ok(courses);
     }
 
 
