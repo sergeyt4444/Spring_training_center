@@ -5,9 +5,8 @@ import com.project.repository.AttributeRepository;
 import com.project.repository.ObjAttrRepository;
 import com.project.repository.ObjRepository;
 import com.project.repository.ObjectTypeRepository;
-import liquibase.pro.packaged.A;
-import liquibase.pro.packaged.O;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -43,30 +42,32 @@ public class ObjService {
     }
 
     public List<Obj> findByObjTypeAndParentId(int objType, String parentId) {
-        if (parentId == null) {
-            parentId = "0";
-        }
+        parentId = validateParentId(parentId);
         return objRepository.findAllByObjectTypeAndParentId(objType, parentId);
     }
 
     public Obj findByObjTypeAndName(int objType, String name) {
-        if (name == null) {
-            name = "";
-        }
+        name = validateName(name);
         return objRepository.findByObjectTypeAndName(objType, name).get(0);
     }
 
     public Obj findByObjTypeAndName(ObjectTypeEnum objectTypeEnum, String name) {
-        if (name == null) {
-            name = "";
-        }
+        name = validateName(name);
         return objRepository.findByObjectTypeAndName(objectTypeEnum.getValue(), name).get(0);
     }
 
+    public Obj findByObjTypeAndUsername(int objType, String username) {
+        username = validateName(username);
+        return objRepository.findByObjectTypeAndUsername(objType, username).get(0);
+    }
+
+    public Obj findByObjTypeAndUsername(ObjectTypeEnum objectTypeEnum, String username) {
+        username = validateName(username);
+        return objRepository.findByObjectTypeAndUsername(objectTypeEnum.getValue(), username).get(0);
+    }
+
     public List<Obj> findByObjTypeAndParentId(ObjectTypeEnum objectTypeEnum, String parentId) {
-        if (parentId == null) {
-            parentId = "0";
-        }
+        parentId = validateParentId(parentId);
         return objRepository.findAllByObjectTypeAndParentId(objectTypeEnum.getValue(), parentId);
     }
 
@@ -90,5 +91,23 @@ public class ObjService {
         objRepository.save(obj);
     }
 
+    public List<Obj> findFilteredObjects(int objId, String parentId, List<String> difficulties,
+                                         List<String> languages, List<String> formats) {
+        return objRepository.findFilteredObjects(objId, parentId, difficulties, languages, formats);
+    }
+
+    private String validateParentId(String parentId) {
+        if (parentId == null) {
+            return  "0";
+        }
+        return parentId;
+    }
+
+    private String validateName(String name) {
+        if (name == null) {
+            return "";
+        }
+        return name;
+    }
 
 }
