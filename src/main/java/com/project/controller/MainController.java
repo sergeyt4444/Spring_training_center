@@ -8,7 +8,10 @@ import com.project.service.ObjService;
 import com.project.service.ObjectTypeService;
 import com.project.tools.ObjectConverter;
 import com.sun.jersey.api.NotFoundException;
+import liquibase.util.StringUtil;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -86,8 +89,11 @@ public class MainController {
 
     @PreAuthorize("hasRole('USER')")
     @GetMapping("courses/{pid}")
-    public ResponseEntity<List<Obj>> getCourses(@PathVariable(value = "pid")Integer parentId) {
-        return ResponseEntity.ok(objService.findByObjTypeAndParentId(ObjectTypeEnum.COURSE, parentId.toString()));
+    public ResponseEntity<List<Obj>> getCourses(@PathVariable(value = "pid")Integer parentId,
+                                                @RequestParam(defaultValue = "1") Integer page,
+                                                @RequestParam(defaultValue = "10") Integer pageSize) {
+        return ResponseEntity.ok(objService.findByObjTypeAndParentId(ObjectTypeEnum.COURSE, parentId.toString(),
+                                 page, pageSize));
     }
 
     @PreAuthorize("hasRole('USER')")
@@ -95,8 +101,26 @@ public class MainController {
     public ResponseEntity<List<Obj>> getFilteredCourses(@PathVariable(value = "pid")Integer parentId,
                                                         @RequestParam List<String> difficulties,
                                                         @RequestParam List<String> languages,
-                                                        @RequestParam List<String> formats) {
+                                                        @RequestParam List<String> formats,
+                                                        @RequestParam(defaultValue = "1") Integer page,
+                                                        @RequestParam(defaultValue = "10") Integer pageSize) {
         return ResponseEntity.ok(objService.findFilteredObjects(ObjectTypeEnum.COURSE.getValue(), parentId.toString(),
+                difficulties, languages, formats, page, pageSize));
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("courses_count/{pid}")
+    public ResponseEntity<Integer> getCoursesCount(@PathVariable(value = "pid")Integer parentId) {
+        return ResponseEntity.ok(objService.countByObjTypeAndParentId(ObjectTypeEnum.COURSE.getValue(), parentId.toString()));
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("filteredcourses_count/{pid}")
+    public ResponseEntity<Integer> getFilteredCoursesCount(@PathVariable(value = "pid")Integer parentId,
+                                                        @RequestParam List<String> difficulties,
+                                                        @RequestParam List<String> languages,
+                                                        @RequestParam List<String> formats) {
+        return ResponseEntity.ok(objService.countFilteredObjects(ObjectTypeEnum.COURSE.getValue(), parentId.toString(),
                 difficulties, languages, formats));
     }
 
@@ -182,15 +206,40 @@ public class MainController {
 
     @PreAuthorize("hasRole('USER')")
     @GetMapping("usercourses/{name}")
-    public ResponseEntity<List<Obj>> getUserCourses(@PathVariable (value = "name") String username) {
+    public ResponseEntity<List<Obj>> getUserCourses(@PathVariable (value = "name") String username,
+                                                    @RequestParam(defaultValue = "1") Integer page,
+                                                    @RequestParam(defaultValue = "10") Integer pageSize) {
         Obj user = objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username);
         Map<Integer, String> mappedUser = ObjectConverter.convertObject(user);
-        List<String> coursesNames = Arrays.asList(mappedUser.get(AttrEnum.USER_COURSES.getValue()).split(";"));
+        List<String> coursesIds = Arrays.asList(mappedUser.get(AttrEnum.USER_COURSES.getValue()).split(";"));
         List<Obj> courses = new ArrayList<>();
-        for (String courseName: coursesNames) {
-            courses.add(objService.findByObjTypeAndName(ObjectTypeEnum.COURSE.getValue(), courseName));
+        for (int i = (page-1)*pageSize; i < page*pageSize && i < coursesIds.size(); i++) {
+            courses.add(objService.findById(Integer.parseInt(coursesIds.get(i))).orElseThrow(() -> new NotFoundException()));
         }
         return ResponseEntity.ok(courses);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("usercourses/{name}/count")
+    public ResponseEntity<Integer> getUserCoursesCount(@PathVariable (value = "name") String username) {
+        Obj user = objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username);
+        Map<Integer, String> mappedUser = ObjectConverter.convertObject(user);
+        return ResponseEntity.ok(StringUtils.countMatches(mappedUser.get(AttrEnum.USER_COURSES.getValue()), ";"));
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("latest_courses")
+    public ResponseEntity<List<Obj>> getLatestCourses(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        List<Obj> result = objService.findCoursesPaged(page, pageSize);
+        return ResponseEntity.ok(result);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("courses_count")
+    public ResponseEntity<Integer> getCoursesCount() {
+        return ResponseEntity.ok(objService.getCoursesCount());
     }
 
 
