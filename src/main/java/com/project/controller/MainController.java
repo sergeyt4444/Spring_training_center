@@ -12,6 +12,7 @@ import liquibase.util.StringUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -81,10 +82,16 @@ public class MainController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping("object_by_id/{id}")
     public ResponseEntity<Obj> getObjectById(@PathVariable(value = "id")Integer id) {
-        Obj obj = objService.findById(id).orElseThrow(
-                () -> new NotFoundException()
-        );
-        return ResponseEntity.ok(obj);
+        try {
+            Obj obj = objService.findById(id).orElseThrow(
+                    () -> new NotFoundException()
+            );
+            return ResponseEntity.ok(obj);
+        }
+        catch (NotFoundException e) {
+            return new ResponseEntity<Obj>(
+                    null, new HttpHeaders(), HttpStatus.NOT_FOUND);
+        }
     }
 
     @PreAuthorize("hasRole('USER')")
@@ -240,6 +247,21 @@ public class MainController {
     @GetMapping("courses_count")
     public ResponseEntity<Integer> getCoursesCount() {
         return ResponseEntity.ok(objService.getCoursesCount());
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("search")
+    public ResponseEntity<List<Obj>> searchCourses(@RequestParam String searchQuery,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        List<Obj> result = objService.searchObj(searchQuery, ObjectTypeEnum.COURSE.getValue(), page, pageSize);
+        return ResponseEntity.ok(result);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("search_count")
+    public ResponseEntity<Integer> countSearchCourses(@RequestParam String searchQuery) {
+        return ResponseEntity.ok(objService.countSearchObj(searchQuery, ObjectTypeEnum.COURSE.getValue()));
     }
 
 

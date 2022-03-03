@@ -123,6 +123,16 @@ public class ObjService {
         return objRepository.countAllByObjectType_ObjTypesId(ObjectTypeEnum.COURSE.getValue());
     }
 
+    public List<Obj> searchObj(String searchQuery, int objTypeId, Integer pageNum, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNum - 1, pageSize);
+        List<Obj> results = objRepository.searchObj(searchQuery, objTypeId, pageable);
+        return results;
+    }
+
+    public int countSearchObj(String searchQuery, int objTypeId) {
+        return objRepository.countSearchObj(searchQuery, objTypeId);
+    }
+
     private String validateParentId(String parentId) {
         if (parentId == null) {
             return  "0";

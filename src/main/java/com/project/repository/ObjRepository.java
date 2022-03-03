@@ -63,4 +63,15 @@ public interface ObjRepository extends JpaRepository<Obj, Integer> {
     public List<Obj> findAllByObjectTypeOrderedByAttrValue(@Param("objId")int objTypeId, Pageable pageable);
 
     public int countAllByObjectType_ObjTypesId(@Param("objId")int objTypeId);
+
+    @Query("select distinct obj from Obj obj join obj.objAttrs objAttr where (obj.objectType.objTypesId = :objId) " +
+            "and ((objAttr.attribute.attrId = 1) or (objAttr.attribute.attrId = 2)) " +
+            "and (lower(objAttr.value) like lower(CONCAT('%',:search,'%')))")
+    public List<Obj> searchObj(@Param("search")String search, @Param("objId")int objTypeId, Pageable pageable);
+
+    @Query("select count(distinct obj) from Obj obj join obj.objAttrs objAttr where (obj.objectType.objTypesId = :objId) " +
+            "and ((objAttr.attribute.attrId = 1) or (objAttr.attribute.attrId = 2)) " +
+            "and (lower(objAttr.value) like lower(CONCAT('%',:search,'%')))")
+    public int countSearchObj(@Param("search")String search, @Param("objId")int objTypeId);
+
 }
