@@ -6,16 +6,11 @@ import com.project.repository.ObjAttrRepository;
 import com.project.repository.ObjRepository;
 import com.project.repository.ObjectTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ObjService {
@@ -125,12 +120,13 @@ public class ObjService {
 
     public List<Obj> searchObj(String searchQuery, int objTypeId, Integer pageNum, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNum - 1, pageSize);
-        List<Obj> results = objRepository.searchObj(searchQuery, objTypeId, pageable);
+        List<Integer> resultIds = objRepository.searchObjIds(prepareSearchQuery(searchQuery), objTypeId, pageable);
+        List<Obj> results = objRepository.findAllByObjIdIn(resultIds);
         return results;
     }
 
     public int countSearchObj(String searchQuery, int objTypeId) {
-        return objRepository.countSearchObj(searchQuery, objTypeId);
+        return objRepository.countSearchObj(prepareSearchQuery(searchQuery), ObjectTypeEnum.COURSE.getValue());
     }
 
     private String validateParentId(String parentId) {
@@ -145,6 +141,20 @@ public class ObjService {
             return "";
         }
         return name;
+    }
+
+    private String prepareSearchQuery(String searchQuery) {
+        searchQuery = searchQuery.replaceAll("\\pP", "");
+        List<String> queryWords = Arrays.asList(searchQuery.split(" "));
+        StringBuilder queryString = new StringBuilder("(");
+        if (!queryWords.isEmpty()) {
+            queryString.append("%").append(queryWords.get(0)).append("%");
+            for (int i = 1; i < queryWords.size(); i++) {
+                queryString.append("|").append("%").append(queryWords.get(i)).append("%");
+            }
+        }
+        queryString.append(")");
+        return queryString.toString();
     }
 
 }

@@ -1,6 +1,7 @@
 package com.project.repository;
 
 import com.project.entity.Obj;
+import liquibase.pro.packaged.Q;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +15,8 @@ import java.util.List;
 public interface ObjRepository extends JpaRepository<Obj, Integer> {
 
     public List<Obj> findAllByObjectType_ObjTypesId(int objId);
+
+    public List<Obj> findAllByObjIdIn(List<Integer> ids);
 
     @Query("select obj from Obj obj join obj.objAttrs objAttr where (obj.objectType.objTypesId = :objId) "
             + "and (objAttr.value = :parentId) and (objAttr.attribute.attrId = 3)")
@@ -64,14 +67,15 @@ public interface ObjRepository extends JpaRepository<Obj, Integer> {
 
     public int countAllByObjectType_ObjTypesId(@Param("objId")int objTypeId);
 
-    @Query("select distinct obj from Obj obj join obj.objAttrs objAttr where (obj.objectType.objTypesId = :objId) " +
-            "and ((objAttr.attribute.attrId = 1) or (objAttr.attribute.attrId = 2)) " +
-            "and (lower(objAttr.value) like lower(CONCAT('%',:search,'%')))")
-    public List<Obj> searchObj(@Param("search")String search, @Param("objId")int objTypeId, Pageable pageable);
+    @Query(value = "select distinct object.obj_id from object join obj_attr on object.obj_id=obj_attr.obj_id " +
+            "where obj_type_id = :objId and obj_attr.attr_id IN (1,2) and (lower(obj_attr.value) similar to :search)",
+            nativeQuery = true)
+    public List<Integer> searchObjIds(@Param("search")String search, @Param("objId")int objTypeId, Pageable pageable);
 
-    @Query("select count(distinct obj) from Obj obj join obj.objAttrs objAttr where (obj.objectType.objTypesId = :objId) " +
-            "and ((objAttr.attribute.attrId = 1) or (objAttr.attribute.attrId = 2)) " +
-            "and (lower(objAttr.value) like lower(CONCAT('%',:search,'%')))")
+    @Query(value = "SELECT count(distinct object.obj_id) FROM object join obj_attr on object.obj_id=obj_attr.obj_id " +
+            "where obj_type_id = :objId and obj_attr.attr_id IN (1,2) and (lower(obj_attr.value) similar to :search)" ,
+            nativeQuery = true)
     public int countSearchObj(@Param("search")String search, @Param("objId")int objTypeId);
+
 
 }
