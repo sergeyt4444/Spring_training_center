@@ -5,12 +5,15 @@ import com.project.repository.AttributeRepository;
 import com.project.repository.ObjAttrRepository;
 import com.project.repository.ObjRepository;
 import com.project.repository.ObjectTypeRepository;
+import com.project.tools.ObjectConverter;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ObjService {
@@ -27,13 +30,13 @@ public class ObjService {
     @Autowired
     private ObjAttrRepository objAttrRepository;
 
-//    public List<Obj> findByObjTypeId(int objType) {
-//        return objRepository.findAllByObjectType_ObjTypesId(objType);
-//    }
-//
-//    public List<Obj> findByObjTypeId(ObjectTypeEnum objectTypeEnum) {
-//        return objRepository.findAllByObjectType_ObjTypesId(objectTypeEnum.getValue());
-//    }
+    public List<Obj> findByObjTypeId(int objType) {
+        return objRepository.findAllByObjectType_ObjTypesId(objType);
+    }
+
+    public List<Obj> findByObjTypeId(ObjectTypeEnum objectTypeEnum) {
+        return objRepository.findAllByObjectType_ObjTypesId(objectTypeEnum.getValue());
+    }
 
     public List<Obj> findByObjTypeAndParentId(int objType, String parentId, int pageNum, int pageSize) {
         parentId = validateParentId(parentId);
@@ -118,11 +121,18 @@ public class ObjService {
         return objRepository.countAllByObjectType_ObjTypesId(ObjectTypeEnum.COURSE.getValue());
     }
 
-    public List<Obj> searchObj(String searchQuery, int objTypeId, Integer pageNum, Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageNum - 1, pageSize);
-        List<Integer> resultIds = objRepository.searchObjIds(prepareSearchQuery(searchQuery), objTypeId, pageable);
+    public List<Map<Integer, String>> searchObj(String searchQuery, int objTypeId, Integer pageNum, Integer pageSize) {
+        String preparedQuery = prepareSearchQuery(searchQuery);
+        List<Integer> resultIds = objRepository.searchObjIds(preparedQuery, objTypeId);
         List<Obj> results = objRepository.findAllByObjIdIn(resultIds);
-        return results;
+        List<Map<Integer, String>> mappedResults = ObjectConverter.convertListOfObjects(results);
+        return mappedResults.stream().filter(obj -> (countQueryWords(obj, searchQuery) >= (StringUtils.countMatches(preparedQuery, "|")/2)))
+                .sorted(new Comparator<Map<Integer, String>>() {
+            @Override
+            public int compare(Map<Integer, String> o1, Map<Integer, String> o2) {
+                return countQueryWords(o2, searchQuery) - countQueryWords(o1, searchQuery);
+            }
+        }).skip((pageNum-1)*pageSize).limit(pageSize).collect(Collectors.toList());
     }
 
     public int countSearchObj(String searchQuery, int objTypeId) {
@@ -155,6 +165,16 @@ public class ObjService {
         }
         queryString.append(")");
         return queryString.toString();
+    }
+
+    private int countQueryWords(Map<Integer, String> obj, String searchQuery) {
+        List<String> queryWords = Arrays.asList(searchQuery.split(" "));
+        int count = 0;
+        for (String queryWord: queryWords) {
+            count += StringUtils.countMatches(obj.get(AttrEnum.COURSE_NAME.getValue()), queryWord);
+            count += StringUtils.countMatches(obj.get(AttrEnum.COURSE_DESCRIPTION.getValue()), queryWord);
+        }
+        return count;
     }
 
 }

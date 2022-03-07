@@ -70,7 +70,7 @@ public interface ObjRepository extends JpaRepository<Obj, Integer> {
     @Query(value = "select distinct object.obj_id from object join obj_attr on object.obj_id=obj_attr.obj_id " +
             "where obj_type_id = :objId and obj_attr.attr_id IN (1,2) and (lower(obj_attr.value) similar to :search)",
             nativeQuery = true)
-    public List<Integer> searchObjIds(@Param("search")String search, @Param("objId")int objTypeId, Pageable pageable);
+    public List<Integer> searchObjIds(@Param("search")String search, @Param("objId")int objTypeId);
 
     @Query(value = "SELECT count(distinct object.obj_id) FROM object join obj_attr on object.obj_id=obj_attr.obj_id " +
             "where obj_type_id = :objId and obj_attr.attr_id IN (1,2) and (lower(obj_attr.value) similar to :search)" ,

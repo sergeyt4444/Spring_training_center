@@ -8,7 +8,7 @@ import com.project.service.ObjService;
 import com.project.service.ObjectTypeService;
 import com.project.tools.ObjectConverter;
 import com.sun.jersey.api.NotFoundException;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang.NumberUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -221,7 +221,9 @@ public class MainController {
         List<String> coursesIds = Arrays.asList(mappedUser.get(AttrEnum.USER_COURSES.getValue()).split(";"));
         List<Obj> courses = new ArrayList<>();
         for (int i = (page-1)*pageSize; i < page*pageSize && i < coursesIds.size(); i++) {
-            courses.add(objService.findById(Integer.parseInt(coursesIds.get(i))).orElseThrow(() -> new NotFoundException()));
+            if (coursesIds.get(i).matches("\\d+")) {
+                courses.add(objService.findById(Integer.parseInt(coursesIds.get(i))).orElseThrow(() -> new NotFoundException()));
+            }
         }
         return ResponseEntity.ok(courses);
     }
@@ -251,10 +253,10 @@ public class MainController {
 
     @PreAuthorize("hasRole('USER')")
     @GetMapping("search")
-    public ResponseEntity<List<Obj>> searchCourses(@RequestParam String searchQuery,
+    public ResponseEntity<List<Map<Integer, String>>> searchCourses(@RequestParam String searchQuery,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        List<Obj> result = objService.searchObj(searchQuery, ObjectTypeEnum.COURSE.getValue(), page, pageSize);
+        List<Map<Integer, String>> result = objService.searchObj(searchQuery, ObjectTypeEnum.COURSE.getValue(), page, pageSize);
         return ResponseEntity.ok(result);
     }
 
@@ -262,6 +264,12 @@ public class MainController {
     @GetMapping("search_count")
     public ResponseEntity<Integer> countSearchCourses(@RequestParam String searchQuery) {
         return ResponseEntity.ok(objService.countSearchObj(searchQuery, ObjectTypeEnum.COURSE.getValue()));
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("categories")
+    public ResponseEntity<List<Obj>> getCategories() {
+        return ResponseEntity.ok(objService.findByObjTypeId(ObjectTypeEnum.CATEGORY));
     }
 
 
