@@ -8,23 +8,20 @@ import com.project.service.ObjService;
 import com.project.service.ObjectTypeService;
 import com.project.tools.ObjectConverter;
 import com.sun.jersey.api.NotFoundException;
-import org.apache.commons.lang.NumberUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RestController
-@RequestMapping("/api")
-public class MainController {
+@RequestMapping("/user")
+@PreAuthorize("hasRole('USER')")
+public class UserController {
 
     @Autowired
     private ObjService objService;
@@ -38,48 +35,21 @@ public class MainController {
     @Autowired
     private ObjAttrService objAttrService;
 
-    @GetMapping("/anonymous")
-    public String getAnonymousInfo() {
-        return "Anonymous";
-    }
-
-    @GetMapping("/user")
-    @PreAuthorize("hasRole('USER')")
-    public String getUserInfo() {
-        return "user info";
-    }
-
-    @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String getAdminInfo() {
-        return "admin info";
-    }
-
-    @GetMapping("/me")
-    public Object getMe() {
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getName();
-    }
-
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("/main_categories")
     public ResponseEntity<List<Obj>> getMainCategories() {
         return ResponseEntity.ok(objService.findByObjTypeAndParentId(ObjectTypeEnum.CATEGORY, "0"));
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("category/{name}")
     public ResponseEntity<Obj> getCategoryByName(@PathVariable(value = "name")String name) {
         return ResponseEntity.ok(objService.findByObjTypeAndName(ObjectTypeEnum.CATEGORY, name));
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("categories/{pid}")
     public ResponseEntity<List<Obj>> getSubCategories(@PathVariable(value = "pid")Integer parentId) {
         return ResponseEntity.ok(objService.findByObjTypeAndParentId(ObjectTypeEnum.CATEGORY, parentId.toString()));
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("object_by_id/{id}")
     public ResponseEntity<Obj> getObjectById(@PathVariable(value = "id")Integer id) {
         try {
@@ -94,7 +64,6 @@ public class MainController {
         }
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("courses/{pid}")
     public ResponseEntity<List<Obj>> getCourses(@PathVariable(value = "pid")Integer parentId,
                                                 @RequestParam(defaultValue = "1") Integer page,
@@ -103,7 +72,6 @@ public class MainController {
                                  page, pageSize));
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("filteredcourses/{pid}")
     public ResponseEntity<List<Obj>> getFilteredCourses(@PathVariable(value = "pid")Integer parentId,
                                                         @RequestParam List<String> difficulties,
@@ -115,13 +83,11 @@ public class MainController {
                 difficulties, languages, formats, page, pageSize));
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("courses_count/{pid}")
     public ResponseEntity<Integer> getCoursesCount(@PathVariable(value = "pid")Integer parentId) {
         return ResponseEntity.ok(objService.countByObjTypeAndParentId(ObjectTypeEnum.COURSE.getValue(), parentId.toString()));
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("filteredcourses_count/{pid}")
     public ResponseEntity<Integer> getFilteredCoursesCount(@PathVariable(value = "pid")Integer parentId,
                                                         @RequestParam List<String> difficulties,
@@ -131,56 +97,6 @@ public class MainController {
                 difficulties, languages, formats));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/categories")
-    public ResponseEntity createCategory(@RequestBody Map<Integer, String> mappedObj) {
-        objService.createObj(mappedObj, ObjectTypeEnum.CATEGORY.getValue());
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/courses")
-    public ResponseEntity createCourse(@RequestBody Map<Integer, String> mappedObj) {
-        objService.createObj(mappedObj, ObjectTypeEnum.COURSE.getValue());
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("courses")
-    public ResponseEntity editCourse(@RequestBody List<Map<String, String>> mappedObjAttrs) {
-        objAttrService.changeObjAttrBulk(mappedObjAttrs);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/attributes")
-    public ResponseEntity<List<Attribute>> getAttributes() {
-        return ResponseEntity.ok(attributeService.findAll());
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/attributes/{id}")
-    public ResponseEntity<List<Attribute>> getAttributesByObjTypeId(@PathVariable(value = "id")Integer objTypeId) {
-        return ResponseEntity.ok(objectTypeService.findAttributesByObjectType(objTypeId));
-    }
-
-    @PreAuthorize("hasRole('MODERATOR')")
-    @PostMapping("/objattrs")
-    public ResponseEntity createObjAttr(@RequestBody Map<String, String> mappedObjAttr) {
-        Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
-        objAttrService.createObjAttr(mappedObjAttr, obj);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
-    }
-
-    @PreAuthorize("hasRole('MODERATOR')")
-    @PutMapping("/objattrs")
-    public ResponseEntity changeObjAttr(@RequestBody Map<String, String> mappedObjAttr) {
-        Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
-        objAttrService.changeObjAttr(mappedObjAttr, obj);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
-    }
-
-    @PreAuthorize("hasRole('USER')")
     @PutMapping("/usercourses")
     public ResponseEntity addUserCourse(@RequestBody Map<String, String> mappedObjAttr) {
         if (MiscTool.accesibleByUsersAttrs.contains(mappedObjAttr.get("name"))) {
@@ -193,25 +109,11 @@ public class MainController {
         }
     }
 
-    @PreAuthorize("hasRole('MODERATOR')")
-    @DeleteMapping("objattrs/{id}")
-    public Map<String, Boolean> deleteObjAttr(@PathVariable (value = "id")Integer id) {
-        ObjAttr objAttr = objAttrService.findById(id).orElseThrow( () ->
-                new NotFoundException());
-        objAttrService.delete(objAttr);
-
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("deleted", true);
-        return response;
-    }
-
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("users/{name}")
     public ResponseEntity getUser(@PathVariable (value = "name") String username) {
         return ResponseEntity.ok(objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username));
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("usercourses/{name}")
     public ResponseEntity<List<Obj>> getUserCourses(@PathVariable (value = "name") String username,
                                                     @RequestParam(defaultValue = "1") Integer page,
@@ -228,7 +130,6 @@ public class MainController {
         return ResponseEntity.ok(courses);
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("usercourses/{name}/count")
     public ResponseEntity<Integer> getUserCoursesCount(@PathVariable (value = "name") String username) {
         Obj user = objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username);
@@ -236,7 +137,6 @@ public class MainController {
         return ResponseEntity.ok(StringUtils.countMatches(mappedUser.get(AttrEnum.USER_COURSES.getValue()), ";"));
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("latest_courses")
     public ResponseEntity<List<Obj>> getLatestCourses(
             @RequestParam(defaultValue = "1") Integer page,
@@ -245,13 +145,11 @@ public class MainController {
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("courses_count")
     public ResponseEntity<Integer> getCoursesCount() {
         return ResponseEntity.ok(objService.getCoursesCount());
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("search")
     public ResponseEntity<List<Map<Integer, String>>> searchCourses(@RequestParam String searchQuery,
             @RequestParam(defaultValue = "1") Integer page,
@@ -260,13 +158,11 @@ public class MainController {
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("search_count")
     public ResponseEntity<Integer> countSearchCourses(@RequestParam String searchQuery) {
         return ResponseEntity.ok(objService.countSearchObj(searchQuery, ObjectTypeEnum.COURSE.getValue()));
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("categories")
     public ResponseEntity<List<Obj>> getCategories() {
         return ResponseEntity.ok(objService.findByObjTypeId(ObjectTypeEnum.CATEGORY));
