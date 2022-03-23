@@ -133,6 +133,10 @@ public class ObjService {
         return objRepository.countAllByObjectType_ObjTypesId(ObjectTypeEnum.COURSE.getValue());
     }
 
+    public int getMainCategoriesCount() {
+        return objRepository.countMainCategories();
+    }
+
     public List<Map<Integer, String>> searchObj(String searchQuery, int objTypeId, Integer pageNum, Integer pageSize) {
         String preparedQuery = prepareSearchQuery(searchQuery);
         List<Integer> resultIds = objRepository.searchObjIds(preparedQuery, objTypeId);
