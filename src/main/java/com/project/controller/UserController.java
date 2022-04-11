@@ -112,6 +112,7 @@ public class UserController {
     public ResponseEntity addUserCourse(@RequestBody Map<String, String> mappedObjAttr) {
         if (MiscTool.accesibleByUsersAttrs.contains(mappedObjAttr.get("name"))) {
             Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
+            Map<Integer, String> mappedObj = ObjectConverter.convertObject(obj);
             objAttrService.changeObjAttr(mappedObjAttr, obj);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
