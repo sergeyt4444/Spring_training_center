@@ -2,20 +2,22 @@ package com.project.controller;
 
 import com.project.entity.*;
 import com.project.misc.MiscTool;
-import com.project.service.AttributeService;
-import com.project.service.ObjAttrService;
-import com.project.service.ObjService;
-import com.project.service.ObjectTypeService;
+import com.project.service.*;
 import com.project.tools.ObjectConverter;
 import com.sun.jersey.api.NotFoundException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.*;
 
 @RestController
@@ -34,6 +36,9 @@ public class UserController {
 
     @Autowired
     private ObjAttrService objAttrService;
+
+    @Autowired
+    private MailService mailService;
 
     @GetMapping("/main_categories")
     public ResponseEntity<List<Obj>> getMainCategories(@RequestParam(defaultValue = "1") Integer page,
@@ -183,6 +188,12 @@ public class UserController {
     @PostMapping("register")
     public ResponseEntity registerUser(@RequestBody Map<Integer, String> mappedObj) {
         objService.createObj(mappedObj, ObjectTypeEnum.USER.getValue());
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("mail")
+    public ResponseEntity sendMailNotifications(@RequestBody Integer courseId) {
+        mailService.sendMailNotifications(courseId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
