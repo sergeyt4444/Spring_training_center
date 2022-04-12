@@ -51,12 +51,24 @@ public class ObjService {
 
     public Obj findByObjTypeAndName(int objType, String name) {
         name = validateName(name);
-        return objRepository.findByObjectTypeAndName(objType, name).get(0);
+        List<Obj> list = objRepository.findByObjectTypeAndName(objType, name);
+        if (list.isEmpty()) {
+            return null;
+        }
+        else {
+            return list.get(0);
+        }
     }
 
     public Obj findByObjTypeAndName(ObjectTypeEnum objectTypeEnum, String name) {
         name = validateName(name);
-        return objRepository.findByObjectTypeAndName(objectTypeEnum.getValue(), name).get(0);
+        List<Obj> list = objRepository.findByObjectTypeAndName(objectTypeEnum.getValue(), name);
+        if (list.isEmpty()) {
+            return null;
+        }
+        else {
+            return list.get(0);
+        }
     }
 
     public Obj findByObjTypeAndUsername(int objType, String username) {
@@ -119,6 +131,10 @@ public class ObjService {
 
     public int getCoursesCount() {
         return objRepository.countAllByObjectType_ObjTypesId(ObjectTypeEnum.COURSE.getValue());
+    }
+
+    public int getMainCategoriesCount() {
+        return objRepository.countMainCategories();
     }
 
     public List<Map<Integer, String>> searchObj(String searchQuery, int objTypeId, Integer pageNum, Integer pageSize) {

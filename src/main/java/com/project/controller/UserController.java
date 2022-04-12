@@ -36,8 +36,19 @@ public class UserController {
     private ObjAttrService objAttrService;
 
     @GetMapping("/main_categories")
-    public ResponseEntity<List<Obj>> getMainCategories() {
-        return ResponseEntity.ok(objService.findByObjTypeAndParentId(ObjectTypeEnum.CATEGORY, "0"));
+    public ResponseEntity<List<Obj>> getMainCategories(@RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        return ResponseEntity.ok(objService.findByObjTypeAndParentId(ObjectTypeEnum.CATEGORY, "0", page,pageSize));
+    }
+
+    @GetMapping("/main_categories_count")
+    public ResponseEntity<Integer> getMainCategoriesCount() {
+        return ResponseEntity.ok(objService.getMainCategoriesCount());
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<Obj>> getUsers() {
+        return ResponseEntity.ok(objService.findByObjTypeId(ObjectTypeEnum.USER));
     }
 
     @GetMapping("category/{name}")
@@ -166,6 +177,12 @@ public class UserController {
     @GetMapping("categories")
     public ResponseEntity<List<Obj>> getCategories() {
         return ResponseEntity.ok(objService.findByObjTypeId(ObjectTypeEnum.CATEGORY));
+    }
+
+    @PostMapping("register")
+    public ResponseEntity registerUser(@RequestBody Map<Integer, String> mappedObj) {
+        objService.createObj(mappedObj, ObjectTypeEnum.USER.getValue());
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
 
