@@ -10,4 +10,5 @@ public class MiscTool {
     public static final Set<String> accesibleByUsersAttrs = Collections.unmodifiableSet(
     new HashSet<String>(Arrays.asList("current participants", "user courses", "courses notified", "subscribers")));
 
+
 }

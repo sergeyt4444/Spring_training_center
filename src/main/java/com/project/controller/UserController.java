@@ -4,20 +4,15 @@ import com.project.entity.*;
 import com.project.misc.MiscTool;
 import com.project.service.*;
 import com.project.tools.ObjectConverter;
-import com.sun.jersey.api.NotFoundException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
+import javax.xml.ws.http.HTTPException;
 import java.util.*;
 
 @RestController
@@ -27,12 +22,6 @@ public class UserController {
 
     @Autowired
     private ObjService objService;
-
-    @Autowired
-    private AttributeService attributeService;
-
-    @Autowired
-    private ObjectTypeService objectTypeService;
 
     @Autowired
     private ObjAttrService objAttrService;
@@ -70,11 +59,11 @@ public class UserController {
     public ResponseEntity<Obj> getObjectById(@PathVariable(value = "id")Integer id) {
         try {
             Obj obj = objService.findById(id).orElseThrow(
-                    () -> new NotFoundException()
+                    () -> new HTTPException(404)
             );
             return ResponseEntity.ok(obj);
         }
-        catch (NotFoundException e) {
+        catch (HTTPException e) {
             return new ResponseEntity<Obj>(
                     null, new HttpHeaders(), HttpStatus.NOT_FOUND);
         }
@@ -117,7 +106,6 @@ public class UserController {
     public ResponseEntity addUserCourse(@RequestBody Map<String, String> mappedObjAttr) {
         if (MiscTool.accesibleByUsersAttrs.contains(mappedObjAttr.get("name"))) {
             Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
-            Map<Integer, String> mappedObj = ObjectConverter.convertObject(obj);
             objAttrService.changeObjAttr(mappedObjAttr, obj);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
@@ -141,7 +129,7 @@ public class UserController {
         List<Obj> courses = new ArrayList<>();
         for (int i = (page-1)*pageSize; i < page*pageSize && i < coursesIds.size(); i++) {
             if (coursesIds.get(i).matches("\\d+")) {
-                courses.add(objService.findById(Integer.parseInt(coursesIds.get(i))).orElseThrow(() -> new NotFoundException()));
+                courses.add(objService.findById(Integer.parseInt(coursesIds.get(i))).orElseThrow(() -> new HTTPException(404)));
             }
         }
         return ResponseEntity.ok(courses);
