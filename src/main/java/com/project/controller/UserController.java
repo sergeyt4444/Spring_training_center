@@ -2,12 +2,8 @@ package com.project.controller;
 
 import com.project.entity.*;
 import com.project.misc.MiscTool;
-import com.project.service.AttributeService;
-import com.project.service.ObjAttrService;
-import com.project.service.ObjService;
-import com.project.service.ObjectTypeService;
+import com.project.service.*;
 import com.project.tools.ObjectConverter;
-import com.sun.jersey.api.NotFoundException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.ws.http.HTTPException;
 import java.util.*;
 
 @RestController
@@ -27,13 +24,10 @@ public class UserController {
     private ObjService objService;
 
     @Autowired
-    private AttributeService attributeService;
-
-    @Autowired
-    private ObjectTypeService objectTypeService;
-
-    @Autowired
     private ObjAttrService objAttrService;
+
+    @Autowired
+    private MailService mailService;
 
     @GetMapping("/main_categories")
     public ResponseEntity<List<Obj>> getMainCategories(@RequestParam(defaultValue = "1") Integer page,
@@ -65,11 +59,11 @@ public class UserController {
     public ResponseEntity<Obj> getObjectById(@PathVariable(value = "id")Integer id) {
         try {
             Obj obj = objService.findById(id).orElseThrow(
-                    () -> new NotFoundException()
+                    () -> new HTTPException(404)
             );
             return ResponseEntity.ok(obj);
         }
-        catch (NotFoundException e) {
+        catch (HTTPException e) {
             return new ResponseEntity<Obj>(
                     null, new HttpHeaders(), HttpStatus.NOT_FOUND);
         }
@@ -135,7 +129,7 @@ public class UserController {
         List<Obj> courses = new ArrayList<>();
         for (int i = (page-1)*pageSize; i < page*pageSize && i < coursesIds.size(); i++) {
             if (coursesIds.get(i).matches("\\d+")) {
-                courses.add(objService.findById(Integer.parseInt(coursesIds.get(i))).orElseThrow(() -> new NotFoundException()));
+                courses.add(objService.findById(Integer.parseInt(coursesIds.get(i))).orElseThrow(() -> new HTTPException(404)));
             }
         }
         return ResponseEntity.ok(courses);
@@ -182,6 +176,12 @@ public class UserController {
     @PostMapping("register")
     public ResponseEntity registerUser(@RequestBody Map<Integer, String> mappedObj) {
         objService.createObj(mappedObj, ObjectTypeEnum.USER.getValue());
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("mail")
+    public ResponseEntity sendMailNotifications(@RequestBody Integer courseId) {
+        mailService.sendMailNotifications(courseId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 

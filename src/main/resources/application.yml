@@ -7,6 +7,17 @@ spring:
     username: postgres
     url: jdbc:postgresql://localhost:5432/coursestemp
     password: postgres
+    mail:
+      host: smtp.gmail.com
+      port: 587
+      username: testmail4444000@gmail.com
+      password: Q!werty123
+      properties:
+        mail:
+          smtp:
+            auth: true
+            starttls:
+              enable: true
 keycloak:
   auth-server-url: http://localhost:8180/auth
   realm: myrealm
