@@ -155,6 +155,10 @@ public class ObjService {
         return objRepository.countSearchObj(prepareSearchQuery(searchQuery), ObjectTypeEnum.COURSE.getValue());
     }
 
+    public void deleteObj(Obj obj) {
+        objRepository.delete(obj);
+    }
+
     private String validateParentId(String parentId) {
         if (parentId == null) {
             return  "0";
@@ -192,5 +196,6 @@ public class ObjService {
         }
         return count;
     }
+
 
 }

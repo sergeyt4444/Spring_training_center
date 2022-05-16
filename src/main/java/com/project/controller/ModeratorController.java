@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,26 +28,43 @@ public class ModeratorController {
 
     @PostMapping("/objattrs")
     public ResponseEntity createObjAttr(@RequestBody Map<String, String> mappedObjAttr) {
-        Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
-        objAttrService.createObjAttr(mappedObjAttr, obj);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        try {
+            Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
+            objAttrService.createObjAttr(mappedObjAttr, obj);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }
+        catch (EntityNotFoundException e) {
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }
     }
 
     @PutMapping("/objattrs")
     public ResponseEntity changeObjAttr(@RequestBody Map<String, String> mappedObjAttr) {
-        Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
-        objAttrService.changeObjAttr(mappedObjAttr, obj);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        try {
+            Obj obj = objService.findById(Integer.parseInt(mappedObjAttr.get("objId"))).orElse(new Obj());
+            objAttrService.changeObjAttr(mappedObjAttr, obj);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }
+        catch (EntityNotFoundException e) {
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }
     }
 
     @DeleteMapping("objattrs/{id}")
     public Map<String, Boolean> deleteObjAttr(@PathVariable (value = "id")Integer id) {
-        ObjAttr objAttr = objAttrService.findById(id).orElseThrow( () ->
-                new NotFoundException());
-        objAttrService.delete(objAttr);
+        try {
+            ObjAttr objAttr = objAttrService.findById(id).orElseThrow( () ->
+                    new EntityNotFoundException());
+            objAttrService.delete(objAttr);
 
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("deleted", true);
-        return response;
+            Map<String, Boolean> response = new HashMap<>();
+            response.put("deleted", true);
+            return response;
+        }
+        catch (EntityNotFoundException e) {
+            Map<String, Boolean> response = new HashMap<>();
+            response.put("deleted", false);
+            return response;
+        }
     }
 }
