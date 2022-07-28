@@ -114,6 +114,14 @@ public class UserController {
         }
     }
 
+    @PutMapping("/usercourses_bulk")
+    public ResponseEntity addUserCourseBulk(@RequestBody List<Map<String, String>> mappedObjAttrList) {
+        for (Map<String,String> mappedObjAttr: mappedObjAttrList) {
+            addUserCourse(mappedObjAttr);
+        }
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
     @GetMapping("users/{name}")
     public ResponseEntity getUser(@PathVariable (value = "name") String username) {
         return ResponseEntity.ok(objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username));
@@ -140,6 +148,52 @@ public class UserController {
         Obj user = objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username);
         Map<Integer, String> mappedUser = ObjectConverter.convertObject(user);
         return ResponseEntity.ok(StringUtils.countMatches(mappedUser.get(AttrEnum.USER_COURSES.getValue()), ";"));
+    }
+
+    @GetMapping("passed_usercourses/{name}/count")
+    public ResponseEntity<Integer> getPassedUserCoursesCount(@PathVariable (value = "name") String username) {
+        Obj user = objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username);
+        Map<Integer, String> mappedUser = ObjectConverter.convertObject(user);
+        return ResponseEntity.ok(StringUtils.countMatches(mappedUser.get(AttrEnum.COURSES_FINISHED.getValue()), ";"));
+    }
+
+    @GetMapping("passed_usercourses/{name}")
+    public ResponseEntity<List<Obj>> getPassedUserCourses(@PathVariable (value = "name") String username,
+                                                    @RequestParam(defaultValue = "1") Integer page,
+                                                    @RequestParam(defaultValue = "10") Integer pageSize) {
+        Obj user = objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username);
+        Map<Integer, String> mappedUser = ObjectConverter.convertObject(user);
+        List<String> coursesIds = Arrays.asList(mappedUser.get(AttrEnum.COURSES_FINISHED.getValue()).split(";"));
+        List<Obj> courses = new ArrayList<>();
+        for (int i = (page-1)*pageSize; i < page*pageSize && i < coursesIds.size(); i++) {
+            if (coursesIds.get(i).matches("\\d+")) {
+                courses.add(objService.findById(Integer.parseInt(coursesIds.get(i))).orElseThrow(() -> new HTTPException(404)));
+            }
+        }
+        return ResponseEntity.ok(courses);
+    }
+
+    @GetMapping("failed_usercourses/{name}")
+    public ResponseEntity<List<Obj>> getFailedUserCourses(@PathVariable (value = "name") String username,
+                                                    @RequestParam(defaultValue = "1") Integer page,
+                                                    @RequestParam(defaultValue = "10") Integer pageSize) {
+        Obj user = objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username);
+        Map<Integer, String> mappedUser = ObjectConverter.convertObject(user);
+        List<String> coursesIds = Arrays.asList(mappedUser.get(AttrEnum.COURSES_FAILED.getValue()).split(";"));
+        List<Obj> courses = new ArrayList<>();
+        for (int i = (page-1)*pageSize; i < page*pageSize && i < coursesIds.size(); i++) {
+            if (coursesIds.get(i).matches("\\d+")) {
+                courses.add(objService.findById(Integer.parseInt(coursesIds.get(i))).orElseThrow(() -> new HTTPException(404)));
+            }
+        }
+        return ResponseEntity.ok(courses);
+    }
+
+    @GetMapping("failed_usercourses/{name}/count")
+    public ResponseEntity<Integer> getFailedUserCoursesCount(@PathVariable (value = "name") String username) {
+        Obj user = objService.findByObjTypeAndUsername(ObjectTypeEnum.USER.getValue(), username);
+        Map<Integer, String> mappedUser = ObjectConverter.convertObject(user);
+        return ResponseEntity.ok(StringUtils.countMatches(mappedUser.get(AttrEnum.COURSES_FAILED.getValue()), ";"));
     }
 
     @GetMapping("latest_courses")
@@ -183,6 +237,11 @@ public class UserController {
     public ResponseEntity sendMailNotifications(@RequestBody Integer courseId) {
         mailService.sendMailNotifications(courseId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("all_courses")
+    public  ResponseEntity<List<Obj>> getAllCourses() {
+        return ResponseEntity.ok(objService.findByObjTypeId(ObjectTypeEnum.COURSE.getValue()));
     }
 
 

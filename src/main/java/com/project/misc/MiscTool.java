@@ -5,7 +5,8 @@ import java.util.*;
 public class MiscTool {
 
     public static final Set<String> accesibleByUsersAttrs = Collections.unmodifiableSet(
-    new HashSet<String>(Arrays.asList("current participants", "user courses", "courses notified", "subscribers")));
+    new HashSet<String>(Arrays.asList("current participants", "user courses", "courses notified", "subscribers",
+            "courses finished", "courses failed")));
 
     public static String removeNumFromStringList(String stringList, int forRemoval) {
         List<String> list = new ArrayList<>();

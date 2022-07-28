@@ -67,4 +67,22 @@ public class ModeratorController {
             return response;
         }
     }
+
+    @DeleteMapping("objattrs/bulk_delete/{id}")
+    public Map<String, Boolean> bulkDeleteObjAttr(@PathVariable (value = "id")Integer id) {
+        try {
+            ObjAttr objAttr = objAttrService.findById(id).orElseThrow( () ->
+                    new EntityNotFoundException());
+            objAttrService.delete(objAttr);
+
+            Map<String, Boolean> response = new HashMap<>();
+            response.put("deleted", true);
+            return response;
+        }
+        catch (EntityNotFoundException e) {
+            Map<String, Boolean> response = new HashMap<>();
+            response.put("deleted", false);
+            return response;
+        }
+    }
 }

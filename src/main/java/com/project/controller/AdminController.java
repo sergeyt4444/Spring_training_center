@@ -97,4 +97,17 @@ public class AdminController {
         }
     }
 
+    @GetMapping("users")
+    public ResponseEntity<List<Obj>> getUsers(@RequestParam(defaultValue = "1") Integer page,
+                                              @RequestParam(defaultValue = "10") Integer pageSize) {
+        return ResponseEntity.ok(objService.findbyObjTypeId(ObjectTypeEnum.USER.getValue(), page, pageSize));
+    }
+
+
+    @GetMapping("users/count")
+    public int getUsersCount() {
+        return objService.countByObjTypeId(ObjectTypeEnum.USER.getValue());
+    }
+
+
 }

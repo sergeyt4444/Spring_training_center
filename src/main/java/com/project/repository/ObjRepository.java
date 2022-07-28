@@ -16,6 +16,8 @@ public interface ObjRepository extends JpaRepository<Obj, Integer> {
 
     public List<Obj> findAllByObjectType_ObjTypesId(int objId);
 
+    public List<Obj> findAllByObjectType_ObjTypesId(int objId, Pageable pageable);
+
     public List<Obj> findAllByObjIdIn(List<Integer> ids);
 
     @Query("select obj from Obj obj join obj.objAttrs objAttr where (obj.objectType.objTypesId = :objId) "
