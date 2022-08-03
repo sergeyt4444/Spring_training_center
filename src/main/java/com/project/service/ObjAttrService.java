@@ -8,6 +8,7 @@ import com.project.repository.ObjAttrRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,6 +35,9 @@ public class ObjAttrService {
     }
 
     public void createObjAttr(Map<String, String> mappedObjAttr, Obj obj) {
+        if (obj == null) {
+            return;
+        }
         Attribute attribute = attributeRepository.findByAttrName(mappedObjAttr.get("name"));
 
         if (attribute == null) {
@@ -69,13 +73,17 @@ public class ObjAttrService {
 
     public void changeObjAttr(Map<String, String> mappedObjAttr, Obj obj) {
         ObjAttr objAttr = objAttrRepository.findByAttribute_AttrNameAndObjId(mappedObjAttr.get("name"), obj.getObjId());
-        objAttr.setValue(mappedObjAttr.get("value"));
+        if (objAttr != null) {
+            objAttr.setValue(mappedObjAttr.get("value"));
 
-        objAttrRepository.save(objAttr);
+            objAttrRepository.save(objAttr);
+        }
     }
 
     public void delete(ObjAttr objAttr) {
-        objAttrRepository.delete(objAttr);
+        if (objAttr != null) {
+            objAttrRepository.delete(objAttr);
+        }
     }
 
 }

@@ -8,6 +8,7 @@ import com.project.repository.ObjectTypeRepository;
 import com.project.tools.ObjectConverter;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,15 @@ public class ObjService {
 
     public List<Obj> findByObjTypeId(int objType) {
         return objRepository.findAllByObjectType_ObjTypesId(objType);
+    }
+
+    public int countByObjTypeId(int objType) {
+        return objRepository.countAllByObjectType_ObjTypesId(objType);
+    }
+
+    public List<Obj> findbyObjTypeId(int objType, int pageNum, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNum - 1, pageSize);
+        return objRepository.findAllByObjectType_ObjTypesId(objType, pageable);
     }
 
     public List<Obj> findByObjTypeId(ObjectTypeEnum objectTypeEnum) {
@@ -73,7 +83,13 @@ public class ObjService {
 
     public Obj findByObjTypeAndUsername(int objType, String username) {
         username = validateName(username);
-        return objRepository.findByObjectTypeAndUsername(objType, username).get(0);
+        List<Obj> list = objRepository.findByObjectTypeAndUsername(objType, username);
+        if (list.isEmpty()) {
+            return null;
+        }
+        else {
+            return list.get(0);
+        }
     }
 
     public Obj findByObjTypeAndUsername(ObjectTypeEnum objectTypeEnum, String username) {
@@ -155,6 +171,10 @@ public class ObjService {
         return objRepository.countSearchObj(prepareSearchQuery(searchQuery), ObjectTypeEnum.COURSE.getValue());
     }
 
+    public void deleteObj(Obj obj) {
+        objRepository.delete(obj);
+    }
+
     private String validateParentId(String parentId) {
         if (parentId == null) {
             return  "0";
@@ -192,5 +212,6 @@ public class ObjService {
         }
         return count;
     }
+
 
 }

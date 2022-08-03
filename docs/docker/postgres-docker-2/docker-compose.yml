@@ -1,0 +1,131 @@
+version: '3.6'
+ 
+services:
+
+  ingress:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+    network_mode: "host"
+    expose: 
+      - 80
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+  eureka:
+    build: ../eureka2
+    container_name: eureka-docker
+    network_mode: "host"
+    expose: 
+      - 8761
+    ports:
+      - 8761:8761
+    command: java -jar  /eureka.jar
+  keycloak:
+    image: quay.io/keycloak/keycloak:legacy
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: keycloak
+      DB_USER: postgres
+      DB_SCHEMA: public
+      DB_PASSWORD: postgres   
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    container_name: keycloak_docker
+    command: ["-Djboss.http.port=8180"]
+    expose: 
+      - 8180
+    ports:
+      - 8180:8180
+    depends_on:
+      - postgres
+  vaadin: 
+    build: ../vaadin
+    container_name: vaadin_docker
+    network_mode: "host"
+    expose:
+      - 8081
+    ports:
+      - 8081:80
+    depends_on:
+      - eureka
+      - keycloak
+    command: java -jar  -Dspring.profiles.active=zone1 /vaadin.jar
+    environment:
+      - VIRTUAL_HOST=testproject.ru
+  vaadin-2: 
+    build: ../vaadin
+    container_name: vaadin_docker_2
+    network_mode: "host"
+    expose:
+      - 8082
+    ports:
+      - 8082:80
+    depends_on:
+      - eureka
+      - keycloak
+    command: java -jar  -Dspring.profiles.active=zone2 /vaadin.jar
+    environment:
+      - VIRTUAL_HOST=testproject2.ru
+  spring:
+    build: ../backend
+    container_name: spring_docker
+    network_mode: "host"
+    expose:
+      - 8080
+    ports: 
+      - 8080:8080
+    depends_on:
+      - eureka
+      - keycloak
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/coursestemp
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    command: java -jar  -Dspring.profiles.active=zone1 /spring.jar
+  spring-2:
+    build: ../backend
+    container_name: spring_docker_2
+    network_mode: "host"
+    expose:
+      - 8079
+    ports: 
+      - 8079:8079
+    depends_on:
+      - eureka
+      - keycloak
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/coursestemp
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update 
+    command: java -jar -Dspring.profiles.active=zone2 /spring.jar
+  postman:
+    image: postman/newman
+    container_name: postman
+    network_mode: "host"
+    command: 
+      run "https://www.getpostman.com/collections/c2b095d4e99f9c893ddd" -e ./env.json
+    volumes:
+      - ./postman:/etc/newman
+    depends_on:
+      - vaadin
+      - spring
+    
+    
+    
